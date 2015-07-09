@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<constant name="struts.devMode" value="true" /><!-- 开发模式 -->
+
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+
+	<!-- 通配符方式进行访问 
+	<package name="staple" extends="struts-default" namespace="/">
+		<action name="*_*" class="{1}" method="{2}">
+			<result name="success">${resultURL}</result>
+			<result name="redirect" type="redirect">
+				${resultURL}
+			</result>
+		</action>
+	</package>-->
+	<constant name="struts.enable.DynamicMethodInvocation" value="true" />
+	<package name="app" namespace="/" extends="json-default">
+		<action name="app" class="org.creditease.cn.web.AppAction">
+			<result name="error">/login.jsp</result>
+			<result name="register">/login.jsp</result>
+			<result name="loginout">/login.jsp</result>
+			<result name="success">/index.jsp</result>
+			<result name="checkAppKey">/checkAppKey.jsp</result> 
+			
+			<result name="map">/map.jsp</result>
+			<result name="bar">/bar.jsp</result>
+			<result name="scatter">/scatter.jsp</result>
+			<result name="retent">/retention.jsp</result>
+			<result name="excep">/exception.jsp</result>
+			
+		</action>
+	</package>
+	<!--
+	<package name="app" namespace="/app" extends="struts-default">
+		<action name="devSave" class="cn.creditease.web.AppAction"
+			method="devSave"></action>
+			<action name="appInstallList" class="cn.creditease.web.AppAction"
+			method="appInstallList"></action> <action name="appActiveList"
+			class="cn.creditease.web.AppAction" method="appActiveList"></action>
+			<action name="wifiList" class="cn.creditease.web.AppAction"
+			method="wifiList"></action>
+	</package>
+	-->
+</struts>

@@ -1,0 +1,32 @@
+[
+    {
+        "id": "All",
+        "text": "All",
+        "selected": true
+    },
+    {
+        "id": "IOS",
+        "text": "IOS"
+    },
+    {
+        "id": "Android",
+        "text": "Android"
+    },
+    {
+        "id": "Windows Phone",
+        "text": "Windows Phone"
+        
+    },
+    {
+        "id": "Symbian",
+        "text": "Symbian"
+    },
+    {
+        "id": "BlackBerry OS",
+        "text": "BlackBerry OS"
+    },
+    {
+        "id": "other",
+        "text": "Other"
+    }
+]

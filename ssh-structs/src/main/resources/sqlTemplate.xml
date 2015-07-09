@@ -1,0 +1,8 @@
+<configuration>
+	<item>
+		<name>name</name>
+		<value>
+			sql语句
+		</value>
+	</item>
+</configuration>

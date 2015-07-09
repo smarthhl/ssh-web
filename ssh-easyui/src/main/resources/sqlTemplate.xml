@@ -1,0 +1,537 @@
+<configuration>
+	<item>
+		<!-- 产品数据报表 -->
+		<name>productRpt</name>
+		<value>
+			SELECT 
+			  a.id,
+			  a.date_key,
+			  a.app_key,
+			  a.app_ver_key,
+			  a.app_chnl_key,
+			  a.os,
+			  a.goods,
+			  a.curr_act_cnt,
+			  a.curr_reg_cnt,
+			  a.curr_auth_cnt,
+			  a.curr_bind_cnt,
+			  a.curr_po_cnt,
+			  a.curr_trad_cnt,
+			  a.curr_trad_amt,
+			  a.accu_act_cnt,
+			  a.accu_reg_cnt,
+			  a.accu_auth_cnt,
+			  a.accu_bind_cnt,
+			  a.accu_po_cnt,
+			  a.accu_trad_cnt,
+			  a.accu_trad_amt,
+			  a.create_time,
+			  a.update_time
+			FROM
+			  app_evt_effect a 
+			  JOIN
+			  dim_app_channel b 
+			  ON a.app_chnl_key = b.app_chnl_key 
+			  AND a.app_key = b.app_key 
+			WHERE a.app_key IN (${app_key}) 
+			  AND goods !='' 
+			  AND os = COALESCE(${os}, os) 
+			  AND channel = COALESCE(${channel}, channel)
+			  AND channel_sub = COALESCE(${channel_sub}, channel_sub)  
+			  AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+			  AND date_key &lt;= COALESCE(${endDate}, date_key) 
+			ORDER BY date_key DESC 
+		</value>
+	</item>
+	<item>
+		<!-- 日报表 -->
+		<name>dailyRpt</name>
+		<value>
+			SELECT 
+			  date_key,
+			  a.app_key,
+			  channel,
+			  os,
+			  SUM(curr_log_cnt) curr_log_cnt,
+			  SUM(curr_act_cnt) curr_act_cnt,
+			  SUM(curr_reg_cnt) curr_reg_cnt,
+			  SUM(curr_auth_cnt) curr_auth_cnt,
+			  SUM(curr_bind_cnt) curr_bind_cnt,
+			  SUM(curr_po_cnt) curr_po_cnt,
+			  SUM(curr_trad_cnt) curr_trad_cnt,
+			  SUM(curr_trad_amt) curr_trad_amt 
+			FROM
+			  app_evt_effect a 
+			  JOIN
+			  dim_app_channel b 
+			  ON a.app_chnl_key = b.app_chnl_key 
+			  JOIN
+			  dim_app_version c 
+			  ON c.app_ver_key = a.app_ver_key 
+			WHERE a.app_key IN (${app_key}) 
+			  AND os = COALESCE(${os}, os) 
+			  AND channel = COALESCE(${channel}, channel) 
+			  AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+			  AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+			  AND date_key &lt;= COALESCE(${endDate}, date_key) 
+			GROUP BY date_key DESC,
+			  app_key
+		</value>
+	</item>
+	<item>
+		<!-- 累计数据报表 -->
+		<name>accuRpt</name>
+		<value>
+			SELECT 
+			  date_key,
+			  a.app_key,
+			  version_name,
+			  channel,
+			  os,
+			  SUM(accu_log_cnt) accu_log_cnt,
+			  SUM(accu_act_cnt) accu_act_cnt,
+			  SUM(accu_reg_cnt) accu_reg_cnt,
+			  SUM(accu_auth_cnt) accu_auth_cnt,
+			  SUM(accu_bind_cnt) accu_bind_cnt,
+			  SUM(accu_po_cnt) accu_po_cnt,
+			  SUM(accu_trad_cnt) accu_trad_cnt,
+			  SUM(accu_trad_amt) accu_trad_amt 
+			FROM
+			  app_evt_effect a 
+			  JOIN
+			  dim_app_channel b 
+			  ON a.app_chnl_key = b.app_chnl_key 
+			  JOIN
+			  dim_app_version c 
+			  ON c.app_ver_key = a.app_ver_key  
+			WHERE a.app_key IN (${app_key}) 
+			  AND os = COALESCE(${os}, os) 
+			  AND channel = COALESCE(${channel}, channel) 
+			  AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+			  AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+			  AND date_key &lt;= COALESCE(${endDate}, date_key) 
+			GROUP BY date_key DESC,
+			  app_key
+		</value>
+	</item>
+	<item>
+		<!-- 渠道下拉框 -->
+		<name>appChannel</name>
+		<value>
+			SELECT 
+			  channel AS id,
+			  channel AS TEXT 
+			FROM
+			  dim_app_channel 
+			WHERE app_key IN (
+			    (COALESCE(${app_key}, app_key))
+			  ) 
+			GROUP BY channel  
+		</value>
+	</item>
+	<item>
+		<!-- 子渠道下拉框 -->
+		<name>appChannelsub</name>
+		<value>
+			SELECT 
+			  channel_sub AS id,
+			  channel_sub AS TEXT 
+			FROM
+			  dim_app_channel 
+			WHERE app_key IN (
+			    (COALESCE(${app_key}, app_key))
+			  ) 
+			  AND channel=COALESCE(${channel}, channel)  
+		</value>
+	</item>
+	<item>
+		<!-- 用户管理列表 -->
+		<name>appUser</name>
+		<value>
+			SELECT 
+			  app_name,
+			  app_desc,
+			  app_key,
+			  app_pkg_name,
+			  app_type_id,
+			  valid_from,
+			  valid_to,
+			  email,
+			  mobile,
+			  qq,
+			  a.user_id,
+			  b.create_time 
+			FROM
+			  bi_user a,
+			  bi_app_key b 
+			WHERE a.user_id = b.user_id 
+			  AND mobile = COALESCE(${mobile}, mobile) 
+			  AND email = COALESCE(${email}, email) 
+			  AND qq = COALESCE(${qq}, qq) 
+			  AND app_key = COALESCE(${app_key}, app_key) 
+			  AND app_name = COALESCE(${app_name}, app_name) 
+			  AND app_key IN (
+		            ${app_key}
+		        )  
+			ORDER BY valid_to DESC
+		</value>
+	</item>
+	<item>
+		<!-- 用户统计报表 -->
+		<name>appStatistics</name>
+		<value>
+			SELECT 
+			  date_key, 
+			  a.app_key, 
+			  a.app_ver_key, 
+			  channel AS app_chnl_key, 
+			  period_type, 
+			  CASE 
+			    WHEN SUM(act_user_cnt) IS NULL  
+			    THEN 0  
+			    ELSE SUM(act_user_cnt)  
+			  END act_user_cnt, 
+			  CASE 
+			    WHEN SUM(new_user_cnt) IS NULL  
+			    THEN 0  
+			    ELSE SUM(new_user_cnt)  
+			  END new_user_cnt, 
+			  CASE 
+			    WHEN SUM(new_user_active_cnt) IS NULL  
+			    THEN 0  
+			    ELSE SUM(new_user_active_cnt)  
+			  END new_user_active_cnt, 
+			  CASE 
+			    WHEN SUM(new_user_cnt) / SUM(act_user_cnt) IS NULL 
+			    THEN 0 
+			    ELSE SUM(new_user_cnt) / SUM(act_user_cnt)  
+			  END rate  
+			FROM 
+			  app_active a  
+			  JOIN 
+			  dim_period_act b  
+			  ON a.period_act_key = b.period_act_key  
+			  AND a.period_act_key IN (1, 96, 101, 93)  
+			  JOIN 
+			  dim_app_channel d 
+			  ON a.app_chnl_key = d.app_chnl_key 
+			  JOIN 
+			  dim_app_version e 
+			  ON e.app_ver_key = a.app_ver_key 
+			WHERE a.app_key IN (
+			    ${app_key}
+			  ) 
+			  AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+			  AND date_key &lt;= COALESCE(${endDate}, date_key) 
+			  AND channel = COALESCE(${channel}, channel) 
+			  AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+			GROUP BY 
+			  date_key, 
+			  a.period_act_key   
+		</value>
+	</item>
+	<item>
+		<!-- 用户统计列表 -->
+		<name>appStatisticsPage</name>
+		<value>
+			SELECT
+		        t1.date_key,
+		        t1.app_key,
+		        t1.app_ver_key,
+		        t1.app_chnl_key,
+		        CASE 
+		            WHEN SUM(t1.accu_user_cnt) IS NULL THEN 0 
+		            ELSE SUM(t1.accu_user_cnt) 
+		        END accu_user_cnt,
+		        CASE 
+		            WHEN SUM(t1.new_user_cnt) IS NULL THEN 0 
+		            ELSE SUM(t1.new_user_cnt) 
+		        END new_user_cnt,
+		        CASE 
+		            WHEN SUM(t1.act_user_cnt) IS NULL THEN 0 
+		            ELSE SUM(t1.act_user_cnt) 
+		        END act_user_cnt,
+		        CASE 
+		            WHEN SUM(t1.new_user_cnt) / SUM(t1.act_user_cnt) IS NULL THEN 0 
+		            ELSE SUM(t1.new_user_cnt) / SUM(t1.act_user_cnt)*100 
+		        END new_user_rate,
+		        CASE 
+		            WHEN SUM(t1.open_cnt) IS NULL THEN 0 
+		            ELSE SUM(t1.open_cnt) 
+		        END open_cnt,
+		        CASE 
+		            WHEN SUM(sum_duration) / SUM(t1.open_cnt)  IS NULL THEN 0 
+		            ELSE SUM(sum_duration) / SUM(t1.open_cnt) 
+		        END avg_duration,
+		        CASE 
+		            WHEN SUM(act_user_cnt_30) IS NULL THEN 0 
+		            ELSE SUM(act_user_cnt_30) 
+		        END act_user_cnt_30,
+		        CASE 
+		            WHEN SUM(t3.exception_cnt) IS NULL THEN 0 
+		            ELSE SUM(t3.exception_cnt) 
+		        END exception_cnt,
+		        CASE 
+		            WHEN SUM(t3.exception_cnt) / SUM(t3.open_cnt)  IS NULL THEN 0 
+		            ELSE SUM(t3.exception_cnt) / SUM(t3.open_cnt)*100 
+		        END except_rate 
+		    FROM
+		        (SELECT
+		            date_key,
+		            app_key,
+		            app_ver_key,
+		            app_chnl_key,
+		            SUM(accu_user_cnt) accu_user_cnt,
+		            SUM(new_user_cnt) new_user_cnt,
+		            SUM(act_user_cnt) act_user_cnt,
+		            SUM(open_cnt) open_cnt,
+		            SUM(sum_duration) sum_duration,
+		            SUM(act_user_cnt_30)  act_user_cnt_30 
+		        FROM
+		            app_user  
+		        GROUP BY
+		            date_key,
+		            app_key,
+		            app_ver_key,
+		            app_chnl_key) t1  
+		    LEFT JOIN
+		        (
+		            SELECT
+		                date_key,
+		                app_key,
+		                app_ver_key,
+		                app_chnl_key,
+		                SUM(exception_cnt) exception_cnt,
+		                SUM(open_cnt) open_cnt  
+		            FROM
+		                app_exception  
+		            GROUP BY
+		                date_key,
+		                app_key,
+		                app_ver_key,
+		                app_chnl_key
+		        ) t3  
+		            ON t1.date_key = t3.date_key  
+		            AND t1.app_key = t3.app_key  
+		            AND t1.app_ver_key = t3.app_ver_key  
+		            AND t1.app_chnl_key = t3.app_chnl_key  
+		    JOIN
+		        dim_app_channel d 
+		            ON t1.app_chnl_key=d.app_chnl_key 
+		    JOIN
+		        dim_app_version e 
+		            ON e.app_ver_key=t1.app_ver_key 
+		    WHERE
+		        t1.app_key IN (
+		            ${app_key}
+		        )
+				AND t1.date_key &gt;= COALESCE(${beginDate}, t1.date_key) 
+				AND t1.date_key &lt;= COALESCE(${endDate}, t1.date_key)
+		        AND channel = COALESCE(${channel}, channel) 
+		        AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+		    GROUP BY
+		        t1.date_key DESC
+		</value>
+	</item>
+	<item>
+		<!-- 用户留存报表 -->
+		<name>retention</name>
+		<value>
+			SELECT 
+			  date_key,
+			  CASE
+			    WHEN radio IS NULL 
+			    THEN 0 
+			    ELSE radio 
+			  END radio,
+			  period_type 
+			FROM
+			  (SELECT 
+			    date_key,
+			    app_key,
+			    app_ver_key,
+			    app_chnl_key,
+			    period_type,
+			    SUM(user_rtt_cnt),
+			    user_rtt_cnt / new_user_cnt AS radio 
+			  FROM 
+			    app_retention a 
+			    LEFT JOIN 
+			    dim_period_rtt b 
+			    ON a.period_rtt_key = b.period_rtt_key 
+			  WHERE a.period_rtt_key IN (1, 2, 3, 4, 5, 6, 7, 9) 
+			    AND app_key IN (
+			      ${app_key}
+			    ) 
+			    AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+			    AND date_key &lt;= COALESCE(${endDate}, date_key)  
+			  GROUP BY date_key,
+			    app_key,
+			    app_ver_key,
+			    app_chnl_key,
+			    period_type) f  
+			  JOIN 
+			  dim_app_channel d  
+			  ON f.app_chnl_key = d.app_chnl_key  
+			  JOIN 
+			  dim_app_version e  
+			  ON e.app_ver_key = f.app_ver_key  
+			WHERE  
+			  channel = COALESCE(${channel}, channel)  
+			  AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+			GROUP BY date_key,
+			  period_type 
+			ORDER BY date_key   
+		</value>
+	</item>
+	<item>
+		<!-- 用户留存列表 -->
+		<name>retentionPage</name>
+		<value>
+			SELECT
+		        date_key,
+		        SUM(new_user_cnt) AS new_user_cnt,
+		        day1,
+		        day2,
+		        day3,
+		        day4,
+		        day5,
+		        day6,
+		        day7,
+		        day30 
+		    FROM
+		        (SELECT
+		            date_key,
+		            tt.app_key,
+		            tt.app_ver_key,
+		            period_type , 
+		            tt.app_chnl_key,
+		            new_user_cnt,
+		            CASE 
+		                WHEN SUM(day1) IS NULL THEN  0 
+		                ELSE SUM(day1) 
+		            END day1,
+		            CASE 
+		                WHEN SUM(day2) IS NULL THEN  0 
+		                ELSE SUM(day2) 
+		            END day2,
+		            CASE 
+		                WHEN SUM(day3) IS NULL THEN  0 
+		                ELSE SUM(day3) 
+		            END day3,
+		            CASE 
+		                WHEN SUM(day4) IS NULL THEN  0 
+		                ELSE SUM(day4) 
+		            END day4,
+		            CASE 
+		                WHEN SUM(day5) IS NULL THEN  0 
+		                ELSE SUM(day5) 
+		            END day5,
+		            CASE 
+		                WHEN SUM(day6) IS NULL THEN  0 
+		                ELSE SUM(day6) 
+		            END day6,
+		            CASE 
+		                WHEN SUM(day7) IS NULL THEN  0 
+		                ELSE SUM(day7) 
+		            END day7,
+		            CASE 
+		                WHEN SUM(day30) IS NULL THEN  0 
+		                ELSE SUM(day30) 
+		            END day30 
+		        FROM
+		            ( SELECT
+		                date_key,
+		                app_key,
+		                app_ver_key,
+		                app_chnl_key,
+		                radio,
+		                period_type ,
+		                new_user_cnt,
+		                CASE 
+		                    WHEN period_type='1天后' THEN radio*100 
+		                    ELSE 0 
+		                END AS day1,
+		                CASE 
+		                    WHEN period_type='2天后' THEN radio*100  
+		                    ELSE 0  
+		                END day2,
+		                CASE 
+		                    WHEN period_type='3天后' THEN radio*100 
+		                    ELSE 0  
+		                END day3,
+		                CASE 
+		                    WHEN period_type='4天后' THEN radio*100 
+		                    ELSE 0 
+		                END day4,
+		                CASE 
+		                    WHEN period_type='5天后' THEN radio*100 
+		                    ELSE 0 
+		                END day5,
+		                CASE 
+		                    WHEN period_type='6天后' THEN radio*100 
+		                    ELSE 0 
+		                END day6,
+		                CASE 
+		                    WHEN period_type='7天后' THEN radio*100 
+		                    ELSE 0 
+		                END day7,
+		                CASE 
+		                    WHEN period_type='30天后' THEN radio*100 
+		                    ELSE 0 
+		                END day30 
+		            FROM
+		                (SELECT
+		                    date_key,
+		                    app_key,
+		                    app_ver_key,
+		                    app_chnl_key,
+		                    period_type,
+		                    SUM(user_rtt_cnt),
+		                    SUM(new_user_cnt) new_user_cnt ,
+		                    SUM(user_rtt_cnt) / SUM(new_user_cnt) AS radio  
+		                FROM
+		                    app_retention a  
+		                LEFT JOIN
+		                    dim_period_rtt b  
+		                        ON a.period_rtt_key = b.period_rtt_key  
+		                WHERE
+		                    a.period_rtt_key IN (
+		                        1, 2, 3, 4, 5, 6, 7, 9
+		                    ) 
+		                    AND app_key IN (
+		                        ${app_key}
+		                    ) 
+		                    AND date_key &gt;= COALESCE(${beginDate}, date_key) 
+				    AND date_key &lt;= COALESCE(${endDate}, date_key) 
+		                GROUP BY
+		                    date_key,
+		                    app_ver_key,
+		                    app_chnl_key,
+		                    period_type) f  
+		            GROUP BY
+		                date_key,
+		                app_key,
+		                app_ver_key,
+		                app_chnl_key,
+		                period_type  ) tt 
+		            JOIN
+		                dim_app_channel d 
+		                    ON tt.app_chnl_key=d.app_chnl_key 
+		            JOIN
+		                dim_app_version e 
+		                    ON e.app_ver_key=tt.app_ver_key 
+		            WHERE
+		                channel = COALESCE(${channel}, channel) 
+		                AND channel_sub = COALESCE(${channel_sub}, channel_sub) 
+		            GROUP BY
+		                date_key,
+		                tt.app_key,
+		                tt.app_ver_key,
+		                tt.app_chnl_key 
+		                HAVING period_type='1天后' ) ss 
+		        GROUP BY
+		            date_key DESC
+		</value>
+	</item>
+</configuration>

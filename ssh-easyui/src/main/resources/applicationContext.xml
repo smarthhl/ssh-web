@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd">
+	<context:annotation-config />
+	<!-- 指定annotation包名 -->
+	<context:component-scan base-package="org.creditease.cn" />
+	<!-- 配置连接池: -->
+	<!-- 引入外部属性文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	<!-- 配置C3P0连接池: -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"/>
+		<property name="jdbcUrl" value="${jdbc.url}"/>
+		<property name="user" value="${jdbc.user}"/>
+		<property name="password" value="${jdbc.password}"/>
+	</bean>
+	
+	<!-- Hibernate的相关信息 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<!-- 注入连接池 -->
+		<property name="dataSource" ref="dataSource"/>
+		<!-- 配置Hibernate的其他的属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop> -->
+				<prop key="hibernate.dialect">org.creditease.cn.base.BlobMySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.connection.autocommit">false</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<!-- 配置Hibernate的映射文件 -->
+		<property name="annotatedClasses">
+			<list>
+				<!-- for ods_app db-->
+				<value>org.creditease.cn.model.BIAppType</value> 
+				<value>org.creditease.cn.model.BIUser</value>
+				<value>org.creditease.cn.model.BIAppKey</value> 
+				<value>org.creditease.cn.model.IpDown</value>
+				<value>org.creditease.cn.model.BIEvnEffect</value>
+			</list>
+		</property>
+	</bean>
+	
+	
+	<bean id="hibernateTemplate"
+		class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- 定义增强 (事务管理器) -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	
+	<!-- 使用增强2.0 -->
+	<!--关联事务增强  -->
+	<tx:advice id="advice" transaction-manager="transactionManager">
+		
+		<!-- 配置拦截 -->
+		<tx:attributes>
+			<tx:method name="get*" propagation="REQUIRED"/>
+			<tx:method name="find*" propagation="REQUIRED"/>
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="*" propagation="REQUIRED" read-only="false"/>
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 配置拦截规则 -->
+	<aop:config>
+		<!-- 拦截规则 -->
+		<aop:pointcut id="myPointcut" expression="execution(* cn.creditease.service.*.*(..))"/>
+		<aop:advisor advice-ref="advice" pointcut-ref="myPointcut"/>
+	</aop:config>
+	
+</beans>
